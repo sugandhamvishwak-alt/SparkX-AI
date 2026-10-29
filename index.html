@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SparkX AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1e0b45;
+  --bg2: #2c1160;
+  --surf: #341673;
+  --surf2: #431f8a;
+  --tx: #fdeaff;
+  --tx2: #c9a2ee;
+  --ac: #ff3cac;
+  --ac2: #8f6bff;
+  --neon: #3df5ff;
+  --ln: #5a2d9e;
+  --bub: #47208f;
+  --sh: rgba(255, 60, 172, 0.22);
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+:root[data-theme="light"] {
+  --bg: #fff0fa;
+  --bg2: #ffe0f4;
+  --surf: #ffffff;
+  --surf2: #fbe6ff;
+  --tx: #44195f;
+  --tx2: #7d4a9c;
+  --ln: #f0c4e8;
+  --bub: #f3dcff;
+  --sh: rgba(124, 77, 255, 0.18);
+  --neon: #c026d3;
+}
+
+html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+* { box-sizing: border-box; margin: 0; }
+body { height: 100%; font-family: Nunito, system-ui, sans-serif; color: var(--tx); background: linear-gradient(160deg, var(--bg), var(--bg2)); overflow: hidden; }
+h1, h2, h3, .logo { font-family: 'Bricolage Grotesque', system-ui, sans-serif; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--ac2); outline-offset: 2px; }
+#app { display: grid; grid-template-columns: 240px 1fr; height: 100%; }
+nav { background: var(--surf); border-right: 1px solid var(--ln); padding: 18px 14px; display: flex; flex-direction: column; gap: 6px; }
+.logo { font-size: 26px; font-weight: 800; padding: 4px 10px 16px; background: linear-gradient(90deg, var(--ac), var(--ac2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nb { display: flex; gap: 10px; align-items: center; padding: 11px 12px; border-radius: 14px; font-weight: 700; text-align: left; color: var(--tx2); }
+.nb.on { background: linear-gradient(90deg, var(--ac), var(--ac2)); color: #fff; box-shadow: 0 0 18px var(--ac); }
+.nb.mk { background: linear-gradient(135deg, var(--ac), var(--ac2)); color: #fff; border: 1px solid var(--neon); box-shadow: 0 0 16px var(--sh); }
+.nb:hover:not(.on) { background: var(--surf2); }
+.sp { flex: 1; }
+.spark { background: var(--surf2); border-radius: 16px; padding: 14px; font-size: 14px; line-height: 1.4; }
+.spark b { display: block; font-size: 20px; }
+main { overflow-y: auto; min-width: 0; height: 100%; }
+.pad { padding: 24px 28px 32px; }
+.hero { border-radius: 24px; padding: 26px; color: #fff; background: linear-gradient(120deg, #e0309e, #7c4dff 70%, #4cc9f0); box-shadow: 0 12px 30px var(--sh); }
+.hero h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.05; max-width: 16ch; }
+.hero p { margin-top: 8px; opacity: .95; max-width: 46ch; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0 14px; }
+.chip { padding: 8px 14px; border-radius: 99px; background: var(--surf); border: 1px solid var(--ln); font-weight: 700; font-size: 14px; color: var(--tx2); }
+.chip.on { background: var(--ac2); border-color: var(--ac2); color: #fff; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+.card { background: var(--surf); border: 1px solid var(--ln); border-radius: 22px; padding: 16px; text-align: left; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 6px 18px var(--sh); transition: transform .15s, border-color .15s, box-shadow .15s; }
+.card:hover { transform: translateY(-3px); border-color: var(--neon); box-shadow: 0 0 22px var(--sh); }
+.av { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; font-size: 34px; flex: none; }
+.card h3 { font-size: 19px; }
+.card p { font-size: 14px; color: var(--tx2); line-height: 1.35; }
+.tag { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: var(--surf2); color: var(--ac); }
+.row { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 18px; background: var(--surf); border: 1px solid var(--ln); width: 100%; text-align: left; margin-bottom: 10px; }
+.row .av { width: 48px; height: 48px; font-size: 26px; border-radius: 16px; }
+.row small { display: block; color: var(--tx2); margin-top: 2px; }
+#chat { display: none; flex-direction: column; height: 100%; }
+#chat.show { display: flex; }
+.top { display: flex; align-items: center; gap: 12px; padding: 12px 18px; background: var(--surf); border-bottom: 1px solid var(--ln); }
+.top .av { width: 46px; height: 46px; font-size: 25px; border-radius: 15px; }
+.top .who { flex: 1; min-width: 0; }
+.top .who b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; }
+.mood { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--tx2); font-weight: 700; }
+.bar { width: 90px; height: 8px; border-radius: 99px; background: var(--surf2); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 50%; background: linear-gradient(90deg, #ffb703, var(--ac)); transition: width .5s; }
+.msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.m { max-width: min(78%, 520px); padding: 11px 15px; border-radius: 20px; line-height: 1.45; font-size: 16px; animation: pop .2s; white-space: pre-wrap; }
+.m.bot { background: var(--bub); border-bottom-left-radius: 6px; align-self: flex-start; }
+.m.me { background: linear-gradient(120deg, var(--ac), var(--ac2)); color: #fff; border-bottom-right-radius: 6px; align-self: flex-end; }
+.action-text { font-style: italic; color: var(--tx2); }
+.m.me .action-text { color: #f2d9ff; }
+@keyframes pop { from { opacity: 0; transform: scale(.96); } }
+.dots span { display: inline-block; width: 7px; height: 7px; margin: 0 2px; border-radius: 50%; background: var(--ac2); animation: b 1s infinite; }
+.dots span:nth-child(2) { animation-delay: .15s; }
+.dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes b { 50% { transform: translateY(-5px); } }
+.quick { display: flex; gap: 8px; overflow-x: auto; padding: 0 18px 8px; }
+.quick .chip { white-space: nowrap; }
+.inp { display: flex; gap: 10px; padding: 10px 18px 16px; }
+.inp input { flex: 1; min-width: 0; padding: 14px 18px; border-radius: 99px; border: 1px solid var(--ln); background: var(--surf); color: var(--tx); font: inherit; }
+.inp input::placeholder { color: var(--tx2); }
+.send { width: 50px; border-radius: 50%; background: linear-gradient(120deg, var(--ac), var(--ac2)); color: #fff; font-size: 20px; box-shadow: 0 0 16px var(--ac); display: flex; align-items: center; justify-content: center; }
+.send:disabled { opacity: 0.5; cursor: default; }
+.ic { width: 38px; height: 38px; border-radius: 12px; background: var(--surf2); font-size: 18px; display: grid; place-items: center; }
+.sw { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 14px 16px; margin-bottom: 10px; border-radius: 18px; background: var(--surf); border: 1px solid var(--ln); font-weight: 700; text-align: left; }
+.sw small { display: block; color: var(--tx2); font-weight: 500; margin-top: 2px; }
+.sw i { width: 46px; height: 26px; border-radius: 99px; background: var(--surf2); position: relative; flex: none; }
+.sw i:after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--tx2); transition: .2s; }
+.sw.on i { background: linear-gradient(90deg, var(--ac), var(--ac2)); }
+.sw.on i:after { left: 23px; background: #fff; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0; }
+.stat { background: var(--surf); border: 1px solid var(--ln); border-radius: 20px; padding: 16px; text-align: center; }
+.stat b { display: block; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; color: var(--neon); }
+.noglow * { box-shadow: none !important; }
+
+@media (max-width: 760px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  nav { grid-row: 2; flex-direction: row; border-right: 0; border-top: 1px solid var(--ln); padding: 8px; justify-content: space-around; position: relative; z-index: 5; }
+  .logo, .sp, .spark { display: none; }
+  .nb { flex-direction: column; gap: 2px; font-size: 12px; padding: 6px 14px; flex: 1; justify-content: center; }
+  .nb.mk { flex: none; width: 62px; height: 62px; margin-top: -30px; border-radius: 50%; padding: 0; font-size: 10px; border: 4px solid var(--bg); box-shadow: 0 0 22px var(--ac); }
+  .nb.mk span { font-size: 22px; }
+  .pad { padding: 16px; }
+  .bar { width: 60px; }
+  #chat { grid-column: 1 !important; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="app">
+<nav>
+  <div class="logo">⚡ SparkX</div>
+  <button class="nb on" data-v="disc"><span>✨</span>Discover</button>
+  <button class="nb" data-v="chats"><span>💬</span>Chats</button>
+  <button class="nb mk" data-v="make"><span>＋</span>Create</button>
+  <button class="nb" data-v="profile"><span>👤</span>Profile</button>
+  <button class="nb" data-v="settings"><span>⚙️</span>Settings</button>
+  <div class="sp"></div>
+  <div class="spark"><b>Daily spark 🔥</b>Chat with 3 characters today to grow your streak.</div>
+</nav>
+<main id="main"></main>
+<section id="chat" style="grid-column:2;grid-row:1"></section>
+</div>
+
+<script>
+// REPLACE WITH YOUR CLOUDFLARE WORKER PROXY URL
+const WORKER_URL = "https://afterlight-api.your-subdomain.workers.dev";
+
+const INITIAL_CHARACTERS = [
+  {id:1, n:'Luna', e:'🌙', g:['#7c4dff','#e0309e'], t:'Comfort', d:'Gentle night-owl who listens first and fixes later.', m:'Hey you, I was hoping you’d show up. How heavy was today?'},
+  {id:2, n:'Kai', e:'🔥', g:['#ff7a18','#e0309e'], t:'Romance', d:'Confident rival-turned-crush with a soft spot for you.', m:'*leans on the doorframe* Took you long enough. Miss me?'},
+  {id:3, n:'Mochi', e:'🐱', g:['#ff9ecb','#ffd166'], t:'Cozy', d:'A cat-eared café buddy who thinks every day deserves cake.', m:'Nya! I saved you the last strawberry slice 🍰'},
+  {id:4, n:'Aria', e:'🎤', g:['#4cc9f0','#7c4dff'], t:'Idol', d:'Stage-lit pop idol sneaking messages to you between shows.', m:'Backstage, 2 minutes to go… but I wanted to text you first.'},
+  {id:5, n:'Sage', e:'🧙', g:['#43e97b','#38a3a5'], t:'Fantasy', d:'Wandering mage who needs a brave partner for a quest.', m:'A map, a lantern, and you. The dragon won’t know what hit it.'},
+  {id:6, n:'Rex', e:'🤖', g:['#00c2ff','#a06bff'], t:'Sci-fi', d:'Sarcastic ship AI learning what “feelings” mean.', m:'Systems online. Emotional subroutine: curious. Hello, captain.'}
+];
+
+const moods = ['😊 Happy', '😢 Sad', '😍 Smitten', '😤 Annoyed', '🥱 Sleepy'];
+
+// PERSISTENCE WITH LOCAL STORAGE
+let C = JSON.parse(localStorage.getItem('sparkx_characters')) || INITIAL_CHARACTERS;
+const state = {
+  v: 'disc',
+  f: 'All',
+  cur: null,
+  hist: JSON.parse(localStorage.getItem('sparkx_history')) || {},
+  bond: JSON.parse(localStorage.getItem('sparkx_bonds')) || {}
+};
+
+const $ = s => document.querySelector(s);
+const av = c => `<div class="av" style="background:linear-gradient(135deg,${c.g[0]},${c.g[1]})">${c.e}</div>`;
+
+function saveState() {
+  localStorage.setItem('sparkx_characters', JSON.stringify(C));
+  localStorage.setItem('sparkx_history', JSON.stringify(state.hist));
+  localStorage.setItem('sparkx_bonds', JSON.stringify(state.bond));
+}
+
+function formatActions(text) {
+  const safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return safeText.replace(/\*(.*?)\*/g, '<span class="action-text">$1</span>');
+}
+
+function disc() {
+  const tags = ['All', ...new Set(C.map(c => c.t))];
+  return `<div class="pad"><div class="hero"><h1>Pick a spark. Start a story.</h1><p>Heartfelt companions and swoony roleplay, in one place. Every character remembers how you feel.</p></div>
+  <div class="chips">${tags.map(t => `<button class="chip ${t == state.f ? 'on' : ''}" data-f="${t}">${t}</button>`).join('')}</div>
+  <div class="grid">${C.filter(c => state.f == 'All' || c.t == state.f).map(c => `<button class="card" data-c="${c.id}">${av(c)}<h3>${c.n}</h3><span class="tag">${c.t}</span><p>${c.d}</p></button>`).join('')}</div></div>`;
+}
+
+function chats() {
+  const ids = Object.keys(state.hist);
+  const mine = ids.map(i => C.find(c => c.id == i)).filter(Boolean);
+  const rec = C.filter(c => !ids.includes(String(c.id))).slice(0, 3);
+  return `<div class="pad"><h2>My chats</h2><p style="color:var(--tx2);margin:6px 0 16px">${mine.length ? 'Pick up where you left off.' : 'No chats yet, so here are three characters waiting to meet you.'}</p>
+  ${mine.map(c => { const h = state.hist[c.id]; return `<button class="row" data-c="${c.id}">${av(c)}<span><b>${c.n}</b><small>${(h[h.length - 1].t || '').slice(0, 60)}</small></span></button>`; }).join('')}
+  ${mine.length ? '<h3 style="margin:18px 0 10px">Meet someone new</h3>' : ''}
+  ${(mine.length ? rec : C.slice(0, 3)).map(c => `<button class="row" data-c="${c.id}">${av(c)}<span><b>${c.n} · ${c.t}</b><small>${c.d}</small></span></button>`).join('')}</div>`;
+}
+
+function make() {
+  return `<div class="pad"><h2>Create your character</h2><p style="color:var(--tx2);margin:6px 0 18px">Pick a look and a vibe. SparkX does the rest.</p>
+  <div class="chips" id="emo">${['🦊', '🧛', '👑', '🌸', '🐉', '🎧', '🧁', '⭐'].map(e => `<button class="chip" data-e="${e}" style="font-size:24px">${e}</button>`).join('')}</div>
+  <div class="inp" style="padding:0 0 14px"><input id="nm" placeholder="Name your character" maxlength="18"></div>
+  <div class="chips" id="vb">${['Comfort', 'Romance', 'Cozy', 'Fantasy', 'Sci-fi'].map(v => `<button class="chip" data-vb="${v}">${v}</button>`).join('')}</div>
+  <button class="nb on" id="mk" style="justify-content:center;width:100%;max-width:320px">⚡ Spark it to life</button></div>`;
+}
+
+function profile() {
+  const n = Object.keys(state.hist).length;
+  const msgs = Object.values(state.hist).reduce((a, h) => a + h.filter(m => m.w == 'me').length, 0);
+  return `<div class="pad"><div class="hero" style="display:flex;gap:16px;align-items:center"><div class="av" style="width:84px;height:84px;font-size:46px;background:#ffffff33">🦋</div><div><h1 style="font-size:30px">Spark Fan</h1><p>Level 3 storyteller · 4-day streak 🔥</p></div></div>
+  <div class="stats"><div class="stat"><b>${n}</b>Chats</div><div class="stat"><b>${msgs}</b>Messages</div><div class="stat"><b>4</b>Day streak</div></div>
+  <h3 style="margin-bottom:10px">Badges</h3><div class="chips" style="margin-top:0"><span class="chip on">🌙 Night owl</span><span class="chip on">💞 First bond</span><span class="chip">🎨 Creator (make a character)</span><span class="chip">🏆 Bond 100%</span></div></div>`;
+}
+
+function settings() {
+  const lt = document.documentElement.dataset.theme == 'light';
+  const ng = document.documentElement.classList.contains('noglow');
+  const sw = (id, t, s, on, a) => `<button class="sw ${on ? 'on' : ''}" ${a}="${id}"><span>${t}<small>${s}</small></span><i></i></button>`;
+  return `<div class="pad"><h2>Settings</h2><p style="color:var(--tx2);margin:6px 0 18px">Tune SparkX for long, cozy sessions.</p>
+  ${sw('theme', 'Dark mode', 'Deep violet background, easy on the eyes', !lt, 'id')}
+  ${sw('glow', 'Neon glow', 'Soft glowing accents on buttons and cards', !ng, 'id')}
+  ${sw('n', 'Story reminders', 'A gentle nudge when a character replies', true, 'data-sw')}
+  ${sw('s', 'Safe mode', 'Keep romance and roleplay tasteful', true, 'data-sw')}
+  ${sw('m', 'Remember my mood', 'Characters adapt to how you feel', true, 'data-sw')}</div>`;
+}
+
+function render() {
+  $('#chat').classList.remove('show');
+  $('#main').style.display = '';
+  $('#main').innerHTML = { disc, chats, make, profile, settings }[state.v]();
+  document.querySelectorAll('.nb[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v == state.v));
+}
+
+function openChat(id) {
+  const c = C.find(x => x.id == id);
+  state.cur = c;
+  if (!state.hist[id]) {
+    state.hist[id] = [{ w: 'bot', t: c.m }];
+    state.bond[id] = 50;
+    saveState();
+  }
+  $('#main').style.display = 'none';
+  const el = $('#chat');
+  el.classList.add('show');
+  el.innerHTML = `<div class="top"><button class="ic" id="back" aria-label="Back">←</button>${av(c)}<div class="who"><b>${c.n}</b><div class="mood">Bond <div class="bar"><i id="bond"></i></div></div></div><button class="ic" id="mood" aria-label="Set mood">😊</button></div>
+  <div class="msgs" id="msgs"></div>
+  <div class="quick">${['Tell me about you', 'I had a rough day', '*hugs you*', 'Say something sweet'].map(q => `<button class="chip" data-q="${q}">${q}</button>`).join('')}</div>
+  <form class="inp" id="f"><input id="in" placeholder="Message ${c.n}…" autocomplete="off"><button class="send" id="sendBtn" aria-label="Send">➤</button></form>`;
+  state.hist[id].forEach(add);
+  setBond();
+}
+
+function add(m) {
+  const d = document.createElement('div');
+  d.className = 'm ' + m.w;
+  d.innerHTML = formatActions(m.t);
+  $('#msgs').appendChild(d);
+  d.scrollIntoView({ block: 'end' });
+}
+
+function setBond() {
+  const bondEl = $('#bond');
+  if (bondEl) bondEl.style.width = state.bond[state.cur.id] + '%';
+}
+
+async function send(t) {
+  if (!t.trim()) return;
+  const c = state.cur;
+  const h = state.hist[c.id];
+
+  const u = { w: 'me', t: t.trim() };
+  h.push(u);
+  add(u);
+  saveState();
+
+  const sendBtn = $('#sendBtn');
+  if (sendBtn) sendBtn.disabled = true;
+
+  const ty = document.createElement('div');
+  ty.className = 'm bot dots';
+  ty.innerHTML = '<span></span><span></span><span></span>';
+  $('#msgs').appendChild(ty);
+  ty.scrollIntoView({ block: 'end' });
+
+  // CONSTRUCT OPENROUTER SYSTEM PROMPT
+  const systemPrompt = {
+    role: 'system',
+    content: `You are roleplaying as ${c.n}, a character on SparkX AI.
+Personality & Details: ${c.d}
+Writing Style: Immersive, emotive, creative. Describe physical actions, gestures, thoughts, and atmosphere inside single asterisks (e.g., *looks at you gently*), and normal spoken text outside. Keep responses natural, direct, and under 3-4 sentences. Always stay in character as ${c.n}.`
+  };
+
+  const formattedMessages = [
+    systemPrompt,
+    ...h.map(m => ({
+      role: m.w === 'me' ? 'user' : 'assistant',
+      content: m.t
+    }))
+  ];
+
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gryphe/mythomax-l2-13b',
+        messages: formattedMessages,
+        temperature: 0.85
+      })
+    });
+
+    const data = await res.json();
+    ty.remove();
+
+    let botReply = "[Unable to process message right now.]";
+    if (data.choices && data.choices[0]) {
+      botReply = data.choices[0].message.content;
+    }
+
+    const b = { w: 'bot', t: botReply };
+    h.push(b);
+    add(b);
+
+    state.bond[c.id] = Math.min(100, (state.bond[c.id] || 50) + 5);
+    setBond();
+    saveState();
+  } catch (err) {
+    ty.remove();
+    const errReply = { w: 'bot', t: '*Connection lost. Check your Worker backend.*' };
+    h.push(errReply);
+    add(errReply);
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+  }
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button');
+  if (!t) return;
+  if (t.dataset.v) { state.v = t.dataset.v; render(); }
+  else if (t.dataset.f) { state.f = t.dataset.f; render(); }
+  else if (t.dataset.c) openChat(t.dataset.c);
+  else if (t.id == 'back') render();
+  else if (t.dataset.q) send(t.dataset.q);
+  else if (t.id == 'mood') {
+    const i = moods.findIndex(m => m.startsWith(t.textContent));
+    const n = moods[(i + 1) % moods.length];
+    t.textContent = n.split(' ')[0];
+    send('*feeling ' + n.split(' ')[1].toLowerCase() + '*');
+  }
+  else if (t.dataset.e) { document.querySelectorAll('[data-e]').forEach(x => x.classList.toggle('on', x == t)); }
+  else if (t.dataset.vb) { document.querySelectorAll('[data-vb]').forEach(x => x.classList.toggle('on', x == t)); }
+  else if (t.id == 'mk') {
+    const eSel = document.querySelector('[data-e].on');
+    const vSel = document.querySelector('[data-vb].on');
+    const nm = $('#nm').value.trim();
+    if (!eSel || !vSel || !nm) { t.textContent = 'Pick a look, a vibe and a name first'; return; }
+    
+    const colors = [['#ff7a18','#e0309e'], ['#7c4dff','#e0309e'], ['#4cc9f0','#7c4dff'], ['#ff9ecb','#ffd166']];
+    const randG = colors[Math.floor(Math.random() * colors.length)];
+    
+    const nc = {
+      id: Date.now(),
+      n: nm,
+      e: eSel.dataset.e,
+      g: randG,
+      t: vSel.dataset.vb,
+      d: `${vSel.dataset.vb} companion created on SparkX AI.`,
+      m: `Hi, I’m ${nm}. Ask me anything, I’ve been waiting for you.`
+    };
+    C.push(nc);
+    saveState();
+    openChat(nc.id);
+  }
+  else if (t.id == 'theme') {
+    const r = document.documentElement;
+    r.dataset.theme = r.dataset.theme == 'light' ? 'dark' : 'light';
+    t.classList.toggle('on');
+  }
+  else if (t.id == 'glow') {
+    document.documentElement.classList.toggle('noglow');
+    t.classList.toggle('on');
+  }
+  else if (t.dataset.sw) { t.classList.toggle('on'); }
+});
+
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const i = $('#in');
+  if (i) { send(i.value); i.value = ''; }
+});
+
+render();
+</script>
+</body>
+</html>
